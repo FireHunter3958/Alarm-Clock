@@ -7,6 +7,11 @@ public class Clock {
         View view = new View(model);
         model.addObserver(view);
         Controller controller = new Controller(model, view);
-        menuBar menu = new menuBar();
+        
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                View.createAndShowGUI();
+            }
+        });
     }
 }
