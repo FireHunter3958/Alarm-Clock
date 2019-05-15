@@ -6,16 +6,28 @@ import java.awt.geom.*;
 import java.awt.font.*;
 import javax.swing.*;
 
+/**
+ *This class is where the clock GUI is created.
+ * @author 07014975
+ */
 public class ClockPanel extends JPanel {
     
     Model model;
     
+    /**
+     *This method sets the size of the clock panel
+     * @param m is the value used to call the Method class
+     */
     public ClockPanel(Model m) {
         model = m;
         setPreferredSize(new Dimension(200, 200));
         setBackground(Color.white);
     }
     
+    /**
+     *This method is responsible for creating and updating the actual clock that will be displayed in the GUI.
+     * @param g is the value of the Graphics data type.
+     */
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         
