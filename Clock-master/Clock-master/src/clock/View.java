@@ -5,48 +5,52 @@ import javax.swing.*;
 import java.util.Observer;
 import java.util.Observable;
 
-import java.util.Comparator;
 import java.util.PriorityQueue;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.ButtonGroup;
+
 import javax.swing.JMenuBar;
 import javax.swing.KeyStroke;
-import javax.swing.ImageIcon;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
-public class View implements Observer, ActionListener, ItemListener {
-=======
+
+/**
+ *This class handles the GUI, and all related functions. Any extra functionality is linked within the Model class
+ * @author 07014975
+ */
 public class View implements Observer {
-
-    PriorityQueue<Person> q;
     ClockPanel panel;
-    ClockPanel pane2;
     JTextArea output;
     JScrollPane scrollPane;
     String newline = "\n";
     
     //https://stackoverflow.com/questions/683041/how-do-i-use-a-priorityqueue
-    //Comparable<Integer> comparator = new IntegerComparator();
-    //PriorityQueue<Integer> queue = new PriorityQueue<Integer>(8, comparator);
-    PriorityQueue<Integer> alarmQueue = new PriorityQueue<Integer>();
+    Alarm alarm =  new Alarm();
+    String editValueString;
     
-    public View(Model model) {
-        JFrame frame = new JFrame();
-        panel = new ClockPanel(model);
-        //pane2 = new ClockPanel(model);
-        JMenuBar menuBar;
-        JMenu menu, submenu;
-        JMenuItem menuItem;
-        JRadioButtonMenuItem rbMenuItem;
-        JCheckBoxMenuItem cbMenuItem;
+    Model Model = new Model();
+    PriorityQueue<String> alarmView = Model.alarmView;
 
-        //frame.setContentPane(panel);
+    /**
+     *Basic GUI frame is created here.
+     * GUI frame consists of buttons, an alarm clock and a menu system.
+     * Section of code dedicated to prompting user to save on close included.
+     * @param model is required for functionality
+     */
+    public View(final Model model) {
+        final JFrame frame = new JFrame();
+        panel = new ClockPanel(model);
+        JMenuBar menuBar;
+        JMenu menu;
+
+        
         frame.setTitle("Java Clock");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
@@ -55,98 +59,107 @@ public class View implements Observer {
         menuBar = new JMenuBar();
 
         //Build the first menu.
-        menu = new JMenu("A Menu");
+        menu = new JMenu("Menu");
         menu.setMnemonic(KeyEvent.VK_A);
         menu.getAccessibleContext().setAccessibleDescription(
                 "The only menu in this program that has menu items");
         menuBar.add(menu);
-
-        //a group of JMenuItems
+        
         JMenuItem menuItemV2;
-        menuItemV2 = new JMenuItem(new MyAction());
-        //menuItem.setMnemonic(KeyEvent.VK_T); //used constructor instead
+        menuItemV2 = new JMenuItem(new FileAlarm());
+        
         menuItemV2.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_1, ActionEvent.ALT_MASK));
         menuItemV2.getAccessibleContext().setAccessibleDescription(
                 "This doesn't really do anything");
-        //q = new SortedPriorityQueue();
-        menuItemV2.addActionListener(this);
+        
         menu.add(menuItemV2);
         
-        //a group of JMenuItems
-        menuItem = new JMenuItem("A text-only menu item",
-                                 KeyEvent.VK_T);
-        //menuItem.setMnemonic(KeyEvent.VK_T); //used constructor instead
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+        JMenuItem menuItemV3;
+        menuItemV3 = new JMenuItem(new ViewAlarm());
+        
+        menuItemV3.setAccelerator(KeyStroke.getKeyStroke(
                 KeyEvent.VK_1, ActionEvent.ALT_MASK));
-        menuItem.getAccessibleContext().setAccessibleDescription(
+        menuItemV3.getAccessibleContext().setAccessibleDescription(
                 "This doesn't really do anything");
-        menuItem.addActionListener(this);
-        menu.add(menuItem);
+        
+        menu.add(menuItemV3);
+        
+        JMenuItem menuSave;
+        menuSave = new JMenuItem(new ButtonLoad());
+       
+        menuSave.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_1, ActionEvent.ALT_MASK));
+        menuSave.getAccessibleContext().setAccessibleDescription(
+                "This doesn't really do anything");
+        
+        menu.add(menuSave);
         
         
         frame.setJMenuBar(menuBar);
-        // Start of border layout code
         
-        // I've just put a single button in each of the border positions:
-        // PAGE_START (i.e. top), PAGE_END (bottom), LINE_START (left) and
-        // LINE_END (right). You can omit any of these, or replace the button
-        // with something else like a label or a menu bar. Or maybe you can
-        // figure out how to pack more than one thing into one of those
-        // positions. This is the very simplest border layout possible, just
-        // to help you get started.
         
         Container pane = frame.getContentPane();
         
         JButton button = new JButton("Button 1 (PAGE_START)");
-        /*
-        pane.add(button, BorderLayout.PAGE_START);
-         */
+       
         panel.setPreferredSize(new Dimension(200, 200));
         pane.add(panel, BorderLayout.CENTER);
          
-
-        button = new JButton(new ButtonActionv1());
+        button = new JButton(new AddAlarm());
         pane.add(button, BorderLayout.LINE_START);
-        //q = new SortedLinkedPriorityQueue<>();
+        
         
         output = new JTextArea(5, 30);
         output.setEditable(false);
         JScrollPane paneScroll = new JScrollPane(output);
+        
+        button = new JButton(new ViewAlarm());
+        pane.add(button, BorderLayout.PAGE_START);
+        
 
         //Add the text area to the content pane.
         pane.add(paneScroll, BorderLayout.PAGE_END);
-         /*
-        button = new JButton("End Program (End Program)");
-=======
-        button = new JButton("Button 3 (Add Alarm)");
-        pane.add(button, BorderLayout.LINE_START);
-        q = new SortedLinkedPriorityQueue<>();
         
          
-        button = new JButton("Long-Named Button 4 (PAGE_END)");
-
-        pane.add(button, BorderLayout.PAGE_END);
-         */
-        button = new JButton("5 Add Alarm(Edit Alarm)");
+        button = new JButton(new EditAlarm());
         pane.add(button, BorderLayout.LINE_END);
-        /*
-        button = new JButton("5 Add Alarm(LINE_END)");
-        pane.add(button, BorderLayout.BEFORE_FIRST_LINE);
-        */
+        
         pane.add(menuBar, BorderLayout.PAGE_START);
         
         // End of borderlayout code
         
         frame.pack();
         frame.setVisible(true);
+        
+        //https://stackoverflow.com/questions/9093448/how-to-capture-a-jframes-close-button-click-event
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                if (JOptionPane.showConfirmDialog(frame,
+                        "Save Alarms Before Exit?", "Save Alarms?",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
+                    Model.StringWrite("AlarmList");
+                    System.exit(0);
+                    
+                }
+            }
+});
     }
     
+    /**
+     *This method is responsible for repainting the GUI.
+     * @param o is the observable
+     * @param arg is the object
+     */
     public void update(Observable o, Object arg) {
         panel.repaint();
     }
     
-
+    /**
+     *This method creates an output field with a scrollbar. User feedback will be displayed here.
+     * @return contentPane this is the variable that is responsible for the output field below the alarm.
+     */
     public Container createContentPane() {
         //Create the content-pane-to-be.
         JPanel contentPane = new JPanel(new BorderLayout());
@@ -163,220 +176,150 @@ public class View implements Observer {
         return contentPane;
     }
     
-    protected class MyAction extends AbstractAction {
-        public MyAction() {
-        super ("My Menu Item");
-                }
-        public void actionPerformed(ActionEvent e) {
-            //q = new SortedPriorityQueue();
-        }
-    }
-    
-    protected class ButtonActionv1 extends AbstractAction {
-        public ButtonActionv1() {
+    /**
+     *This method is responsible for manually adding an alarm to the queue
+     */
+    protected class AddAlarm extends AbstractAction {
+
+        /**
+         *This section of code is responsible for creating the method, and providing
+         * a title for the button.
+         */
+        public AddAlarm() {
         super ("Add Alarm");
                 }
+
+        /**
+         *This section of code sends the variable v to the Model class, where the 
+         * alarm value is added to the queue.
+         * The alarm queue is then displayed in the output field.
+         * @param v is the variable used to trigger the ActionEvent
+         * within the Model class.
+         */
         public void actionPerformed(ActionEvent v) {
-            final JFrame parent = new JFrame();
-
-            //q = new SortedPriorityQueue();
-            String b = "Action performed."
-                    + newline
-                    + "Button pressed";
-            output.append(b);
+            Model.actionPerformed(v);
+            output.append("\nQueue value is: " + alarmView);
+            //output.append("\n");
             
-            //https://stackoverflow.com/questions/3002787/simple-popup-java-form-with-at-least-two-fields
+          
+        }
+    }
+    
+    /**
+     *This method is responsible for creating a list of stored alarms, along
+     * with edit/delete buttons
+     */
+    protected class ViewAlarm extends AbstractAction {
+
+        /**
+         *This section of code is responsible for creating the method
+         * and providing a title for the button.
+         */
+        public ViewAlarm() {
+        super ("View Alarms");
+                }
+
+        /**
+         *This section of code sends the variable v to the Model class, where the
+         * stored alarms are retrieved and added to the new frame, an edit and a
+         * delete button are generated under each alarm.
+         * @param v is the variable used to trigger the ActionEvent in the Model
+         * class.
+         */
+        public void actionPerformed(ActionEvent v) {
+            Model.ViewAlarm(v);
+            String queueView = String.valueOf(alarmView);
+            //output.append(alarmView);
+            output.append("Current queue is: " + alarmView);
+        }
+    }
+    
+    /**
+     *This method is responsible for saving stored alarms to external files.
+     */
+    protected class FileAlarm extends AbstractAction {
+
+        /**
+         *This section of code is responsible for creating the method and 
+         * providing a title for the button.
+         */
+        public FileAlarm() {
+        super ("Add Alarm to File");
+                }
+        //@Override
+
+        /**
+         *This section of code sends the variable v to the Model class, where the
+         * stored alarms are retrieved and saved into an external file.
+         * @param r is the variable used to trigger the ActionEvent within the
+         * Model class.
+         */
+        @Override
+        public void actionPerformed(ActionEvent r)  {
+           // Model.write("AlarmList");
+            Model.StringWrite("AlarmList");
+
+        }
+    }
+    
+    /**
+     *This method is responsible for loading saved alarms from an external file.
+     */
+    protected class ButtonLoad extends AbstractAction {
+
+        /**
+         *This section of code is responsible for creating the method and 
+         * providing a title for the button.
+         */
+        public ButtonLoad() {
+            super ("Load Alarms from File");
+        }
+
+        /**
+         *This section of code sends the variable s to the Model class, where the
+         * external file is retrieved, and the stored alarms within the external file
+         * are saved into the alarm queue.
+         * @param s is the variable used to trigger the ActionEvent within the
+         * Model class.
+         */
+        public void actionPerformed(ActionEvent s) {
+            try {
+                //Model.Load("AlarmList.ics");
+                Model.StringLoad("AlarmList.ics");
+            } catch (IOException ex) {
+                Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+            } 
+            } 
+    }
+    
+    //https://stackoverflow.com/questions/31238492/writing-ics-ical-file-using-java
+    
+    /**
+     *This method is responsible for creating an easier to access version of the
+     * view alarms button.
+     */
+    protected class EditAlarm extends AbstractAction {
+
+        /**
+         *This section of code is responsible for creating the method and for
+         * providing a title for the button.
+         */
+        public EditAlarm() {
+        super ("View Alarms");
+                }
+
+        /**
+         *This section of code sends the variable n to the Model class, where the
+         * stored alarms are retrieved and added to the new frame, an edit and a
+         * delete button are generated under each alarm.
+         * @param n is the variable used to trigger the ActionEvent in the Model
+         * class.
+         */
+        public void actionPerformed(ActionEvent n) {
+            Model.ViewAlarm(n);
+            output.append("\n");
+            output.append("Queue value is: " + alarmView);
             
-            JTextField field1 = new JTextField("");
-            JTextField field2 = new JTextField("");
-            JTextField field3 = new JTextField("");
-            
-            JPanel panel = new JPanel(new GridLayout(0, 1));
-        //panel.add(combo);
-        panel.add(new JLabel("Hours:"));
-        panel.add(field1);
-        panel.add(new JLabel("Minutes:"));
-        panel.add(field2);
-        panel.add(new JLabel("Seconds:"));
-        panel.add(field3);
-
-            int result = JOptionPane.showConfirmDialog(null, panel, "Test",
-            JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if (result == JOptionPane.OK_OPTION) {
-            String s = field1.getText() + field2.getText() + field3.getText();
-            output.append(" " + field1.getText()
-                + ":" + field2.getText() 
-                + ":" + field3.getText());
-            int queueValue = Integer.parseInt(s);
-            alarmQueue.add (queueValue);
-            output.append("Queue value is: " + alarmQueue);
-        } else {
-            System.out.println("Cancelled");
-        }
-
-            /*
-            String hours = JOptionPane.showInputDialog(parent,
-                        "Add an Alarm:", null);
-            String minutes = JOptionPane.showInputDialog(parent,
-                        "Add an Alarm:", null);
-            String seconds = JOptionPane.showInputDialog(parent,
-                        "Add an Alarm:", null);
-            String alarmValue = hours.getText() + ":" + minutes.getText() + ":" + seconds.getText();
-*/
         }
     }
-
-    public void actionPerformed(ActionEvent e) {
-        JMenuItem source = (JMenuItem)(e.getSource());
-        String s = "Action event detected."
-                   + newline
-                   + "    Event source: " + source.getText()
-                   + " (an instance of " + getClassName(source) + ")";
-        output.append(s + newline);
-        output.setCaretPosition(output.getDocument().getLength());
-    }
-
-    public void itemStateChanged(ItemEvent e) {
-        JMenuItem source = (JMenuItem)(e.getSource());
-        String s = "Item event detected."
-                   + newline
-                   + "    Event source: " + source.getText()
-                   + " (an instance of " + getClassName(source) + ")"
-                   + newline
-                   + "    New state: "
-                   + ((e.getStateChange() == ItemEvent.SELECTED) ?
-                     "selected":"unselected");
-        output.append(s + newline);
-        output.setCaretPosition(output.getDocument().getLength());
-    }
-
-    // Returns just the class name -- no package info.
-    protected String getClassName(Object o) {
-        String classString = o.getClass().getName();
-        int dotIndex = classString.lastIndexOf(".");
-        return classString.substring(dotIndex+1);
-    }
-    
-    protected static void createAndShowGUI() {
-        //Create and set up the window.
-        /*JFrame frame = new JFrame("MenuDemo");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        //Create and set up the content pane.
-        menuBar demo = new menuBar();
-        frame.setJMenuBar(demo.createMenuBar());
-        frame.setContentPane(demo.createContentPane());
-
-        //Display the window.
-        frame.setSize(450, 260);
-        frame.setVisible(true);
-        */
-    }
-    /*
-=======
-
-    protected class SortedLinkedPriorityQueue<T> implements PriorityQueue<T> {
-    
-    private ListNode<T> top;
-    private ListNode<T> temp;
-    private ListNode<T> head;
-    private ListNode<T> tail;
-    
-    public SortedLinkedPriorityQueue() {
-        top = null;
-    }
-    
-    @Override
-    public boolean isEmpty() {
-        return top == null;
-    }
-    
-    @Override
-    public T head() throws QueueUnderflowException{
-        if (isEmpty()) {
-            throw new QueueUnderflowException();
-        } else {
-        return head.getItem();
-        }
-    }
-    
-    @Override
-    public void remove() throws QueueUnderflowException{
-        if (isEmpty()) {
-            throw new QueueUnderflowException();
-        }
-        head = head.getNext();
-    }
-    
-    public void add(T item, int priority) throws QueueOverflowException {
-        { 
-         ListNode current; 
-         ListNode new_node = new ListNode(item, head, priority);
-  
-
-         /* Special case for head node *//*
-=======
-         /* Special case for head node */
-
-         if (head == null || head.priority <= new_node.priority) 
-         { 
-            new_node.next = head; 
-            head = new_node; 
-            top = head;
-         } 
-         else { 
-  
-
-            /* Locate the node before point of insertion. */ /*
-=======
-            /* Locate the node before point of insertion. */
-
-            current = head; 
-  
-            while (current.next != null && 
-                   current.next.priority > new_node.priority) 
-                  current = current.next; 
-  
-            new_node.next = current.next; 
-            current.next = new_node; 
-         } 
-     } 
-    }
-    @Override
-    public String toString() {
-        String result = "";
-         ListNode temp = head; 
-         while (temp != null) 
-         { 
-            //System.out.print(temp.priority+" "); 
-             result += temp.getItem();
-             if(temp.next != null){
-                     result += ", ";
-                } 
-            temp = temp.next; 
-         } /*
-         if (temp.next == null){
-                result += temp.getItem();
-
-            }*/ /*
-=======
-            }*/
-
-            return "List: " + result;
-     }
-    
-    private int size() {
-        ListNode<T> node = top;
-        int result = 0;
-        while (node != null) {
-            result = result + 1;
-            node = node.getNext();
-        }
-        return result;
-    }
-}
-
-*/
-=======
-
 }
