@@ -19,7 +19,11 @@ import javax.swing.JMenuBar;
 import javax.swing.KeyStroke;
 import javax.swing.ImageIcon;
 
+
 public class View implements Observer, ActionListener, ItemListener {
+=======
+public class View implements Observer {
+
     PriorityQueue<Person> q;
     ClockPanel panel;
     ClockPanel pane2;
@@ -101,6 +105,7 @@ public class View implements Observer, ActionListener, ItemListener {
         panel.setPreferredSize(new Dimension(200, 200));
         pane.add(panel, BorderLayout.CENTER);
          
+
         button = new JButton(new ButtonActionv1());
         pane.add(button, BorderLayout.LINE_START);
         //q = new SortedLinkedPriorityQueue<>();
@@ -113,6 +118,14 @@ public class View implements Observer, ActionListener, ItemListener {
         pane.add(paneScroll, BorderLayout.PAGE_END);
          /*
         button = new JButton("End Program (End Program)");
+=======
+        button = new JButton("Button 3 (Add Alarm)");
+        pane.add(button, BorderLayout.LINE_START);
+        q = new SortedLinkedPriorityQueue<>();
+        
+         
+        button = new JButton("Long-Named Button 4 (PAGE_END)");
+
         pane.add(button, BorderLayout.PAGE_END);
          */
         button = new JButton("5 Add Alarm(Edit Alarm)");
@@ -133,6 +146,7 @@ public class View implements Observer, ActionListener, ItemListener {
         panel.repaint();
     }
     
+
     public Container createContentPane() {
         //Create the content-pane-to-be.
         JPanel contentPane = new JPanel(new BorderLayout());
@@ -259,6 +273,8 @@ public class View implements Observer, ActionListener, ItemListener {
         */
     }
     /*
+=======
+
     protected class SortedLinkedPriorityQueue<T> implements PriorityQueue<T> {
     
     private ListNode<T> top;
@@ -297,7 +313,11 @@ public class View implements Observer, ActionListener, ItemListener {
          ListNode current; 
          ListNode new_node = new ListNode(item, head, priority);
   
+
          /* Special case for head node *//*
+=======
+         /* Special case for head node */
+
          if (head == null || head.priority <= new_node.priority) 
          { 
             new_node.next = head; 
@@ -306,7 +326,11 @@ public class View implements Observer, ActionListener, ItemListener {
          } 
          else { 
   
+
             /* Locate the node before point of insertion. */ /*
+=======
+            /* Locate the node before point of insertion. */
+
             current = head; 
   
             while (current.next != null && 
@@ -333,7 +357,11 @@ public class View implements Observer, ActionListener, ItemListener {
          } /*
          if (temp.next == null){
                 result += temp.getItem();
+
             }*/ /*
+=======
+            }*/
+
             return "List: " + result;
      }
     
@@ -347,5 +375,8 @@ public class View implements Observer, ActionListener, ItemListener {
         return result;
     }
 }
+
 */
+=======
+
 }
